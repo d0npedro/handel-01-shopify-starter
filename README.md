@@ -17,7 +17,7 @@ Die enthaltenen Rechtstexte sind strukturierte Muster und keine Rechtsberatung. 
 
 ## Lokal starten
 
-Voraussetzungen: Node.js 20.9 oder neuer und npm.
+Voraussetzungen: Node.js 22.x und npm.
 
 ```powershell
 Copy-Item .env.example .env.local

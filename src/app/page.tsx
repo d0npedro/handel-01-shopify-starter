@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
+import { storeConfig } from "@/lib/config";
 import { getProducts } from "@/lib/shopify";
 
 export default async function HomePage() {
   const products = await getProducts();
+  const demo = storeConfig.mode === "demo";
   return (
     <>
       <section className="hero">
@@ -19,7 +21,7 @@ export default async function HomePage() {
       </section>
 
       <section className="featured-section">
-        <div className="section-heading"><div><p className="eyebrow">Demo-Katalog</p><h2>Vier Wege,<br />Wert zu liefern.</h2></div><Link href="/shop">Alle Produkte <span>↗</span></Link></div>
+        <div className="section-heading"><div><p className="eyebrow">{demo ? "Demo-Katalog" : "Katalog"}</p><h2>Vier Wege,<br />Wert zu liefern.</h2></div><Link href="/shop">Alle Produkte <span>↗</span></Link></div>
         <div className="product-grid">{products.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} />)}</div>
       </section>
 

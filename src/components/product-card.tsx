@@ -37,9 +37,10 @@ export function ProductCard({ product }: { product: Product }) {
           <span className="arrow-link" aria-hidden="true">↗</span>
         </div>
         <p className="tax-note">
-          inkl. MwSt. {variant.requiresShipping ? "zzgl. Versand" : "· kein Versand"}
+          inkl. MwSt. {variant.requiresShipping ? <><Link href="/versand-zahlung">zzgl. Versand</Link></> : "· kein Versand"}
           {product.unitPrice ? ` · ${product.unitPrice}` : ""}
         </p>
+        {variant.compareAtPrice && product.lowestPrice30Days ? <p className="fine-print">Niedrigster Gesamtpreis der letzten 30 Tage: {product.lowestPrice30Days}</p> : null}
       </div>
     </article>
   );

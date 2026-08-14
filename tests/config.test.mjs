@@ -7,6 +7,7 @@ const complete = {
   NEXT_PUBLIC_SITE_URL: "https://shop.example.de",
   SHOPIFY_STORE_DOMAIN: "example.myshopify.com",
   SHOPIFY_STOREFRONT_PRIVATE_TOKEN: "secret",
+  SHOPIFY_STOREFRONT_API_VERSION: "2026-07",
   LEGAL_NAME: "Beispiel GmbH",
   LEGAL_OWNER: "Erika Beispiel",
   LEGAL_STREET: "Beispielweg 1",
@@ -49,4 +50,23 @@ test("live configuration rejects an unsafe Shopify host and a non-HTTPS public U
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.includes("myshopify.com")));
   assert.ok(result.errors.some((error) => error.includes("HTTPS")));
+});
+
+test("live configuration rejects an untested Storefront API version", () => {
+  const result = validateEnv({ ...complete, SHOPIFY_STOREFRONT_API_VERSION: "unstable" });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.includes("2026-07")));
+});
+
+test("live configuration validates German postcode and delivery email addresses", () => {
+  const result = validateEnv({
+    ...complete,
+    LEGAL_POSTCODE: "1011",
+    LEGAL_EMAIL: "keine-adresse",
+    REVOCATION_EMAIL_FROM: "auch-keine-adresse",
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.includes("LEGAL_POSTCODE")));
+  assert.ok(result.errors.some((error) => error.includes("LEGAL_EMAIL")));
+  assert.ok(result.errors.some((error) => error.includes("REVOCATION_EMAIL_FROM")));
 });

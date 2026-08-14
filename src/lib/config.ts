@@ -1,6 +1,7 @@
 import "server-only";
 
 const value = (key: string) => process.env[key]?.trim() ?? "";
+export const STOREFRONT_API_VERSION = "2026-07";
 
 function isPublicHttpsUrl(candidate: string) {
   try {
@@ -13,6 +14,10 @@ function isPublicHttpsUrl(candidate: string) {
 
 function isShopifyDomain(candidate: string) {
   return /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i.test(candidate);
+}
+
+function isEmailAddress(candidate: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) && candidate.length <= 254;
 }
 
 export const storeConfig = {
@@ -29,10 +34,10 @@ export const storeConfig = {
     country: value("LEGAL_COUNTRY") || "Deutschland",
     email: value("LEGAL_EMAIL") || "[E-MAIL EINTRAGEN]",
     phone: value("LEGAL_PHONE") || "[TELEFON EINTRAGEN]",
-    register: value("LEGAL_REGISTER") || "[REGISTERGERICHT, FALLS VORHANDEN]",
-    registerNumber: value("LEGAL_REGISTER_NUMBER") || "[REGISTERNUMMER, FALLS VORHANDEN]",
-    vatId: value("LEGAL_VAT_ID") || "[UST-ID, FALLS VORHANDEN]",
-    lucidNumber: value("LEGAL_LUCID_NUMBER") || "[LUCID-NUMMER VOR PHYSISCHEM VERSAND EINTRAGEN]",
+    register: value("LEGAL_REGISTER"),
+    registerNumber: value("LEGAL_REGISTER_NUMBER"),
+    vatId: value("LEGAL_VAT_ID"),
+    lucidNumber: value("LEGAL_LUCID_NUMBER"),
   },
 };
 
@@ -40,7 +45,7 @@ export const shopifyConfig = {
   domain: value("SHOPIFY_STORE_DOMAIN").replace(/^https?:\/\//, "").replace(/\/$/, ""),
   privateToken: value("SHOPIFY_STOREFRONT_PRIVATE_TOKEN"),
   publicToken: value("SHOPIFY_STOREFRONT_PUBLIC_TOKEN"),
-  apiVersion: value("SHOPIFY_STOREFRONT_API_VERSION") || "2026-07",
+  apiVersion: value("SHOPIFY_STOREFRONT_API_VERSION") || STOREFRONT_API_VERSION,
 };
 
 export const emailConfig = {
@@ -51,11 +56,17 @@ export const emailConfig = {
 
 export const readiness = {
   liveMode: storeConfig.mode === "live",
-  shopify: Boolean(isShopifyDomain(shopifyConfig.domain) && (shopifyConfig.privateToken || shopifyConfig.publicToken)),
-  merchant: ["LEGAL_NAME", "LEGAL_OWNER", "LEGAL_STREET", "LEGAL_POSTCODE", "LEGAL_CITY", "LEGAL_EMAIL", "LEGAL_PHONE"].every(
-    (key) => Boolean(value(key)),
+  shopify: Boolean(
+    isShopifyDomain(shopifyConfig.domain) &&
+      (shopifyConfig.privateToken || shopifyConfig.publicToken) &&
+      shopifyConfig.apiVersion === STOREFRONT_API_VERSION,
   ),
-  revocationEmail: Boolean(emailConfig.apiKey && emailConfig.from && emailConfig.merchant),
+  merchant: Boolean(
+    ["LEGAL_NAME", "LEGAL_OWNER", "LEGAL_STREET", "LEGAL_POSTCODE", "LEGAL_CITY", "LEGAL_PHONE"].every((key) => value(key)) &&
+      /^\d{5}$/.test(value("LEGAL_POSTCODE")) &&
+      isEmailAddress(value("LEGAL_EMAIL")),
+  ),
+  revocationEmail: Boolean(emailConfig.apiKey && isEmailAddress(emailConfig.from) && isEmailAddress(emailConfig.merchant)),
   lucid: Boolean(value("LEGAL_LUCID_NUMBER")),
   siteUrl: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
 };

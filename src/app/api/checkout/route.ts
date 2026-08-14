@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { assertCheckoutReady } from "@/lib/config";
-import { createCheckout, getProducts } from "@/lib/shopify";
-import { sameOrigin } from "@/lib/validation";
+import { createCheckout, getCheckoutVariants } from "@/lib/shopify";
+import { isJsonRequest, sameOrigin } from "@/lib/validation";
 
 type RequestBody = {
   lines?: Array<{ merchandiseId?: unknown; quantity?: unknown }>;
@@ -14,6 +14,7 @@ type RequestBody = {
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return NextResponse.json({ error: "Ungültiger Anfrageursprung." }, { status: 403 });
+  if (!isJsonRequest(request)) return NextResponse.json({ error: "Erwartet wird eine begrenzte JSON-Anfrage." }, { status: 415 });
   try {
     assertCheckoutReady();
     const body = (await request.json()) as RequestBody;
@@ -28,27 +29,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Mindestens eine Warenkorbposition ist ungültig." }, { status: 400 });
     }
 
-    const catalog = await getProducts();
-    const variants = new Map(catalog.flatMap((product) => product.variants.map((variant) => [variant.id, { product, variant }] as const)));
+    const buyerIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const checkoutVariants = await getCheckoutVariants(requested.map((line) => line.merchandiseId), buyerIp);
+    const variants = new Map(checkoutVariants.map((variant) => [variant.id, variant]));
     const resolved = requested.map((line) => ({ ...line, match: variants.get(line.merchandiseId) }));
-    if (resolved.some((line) => !line.match?.variant.availableForSale)) {
+    if (resolved.some((line) => !line.match?.availableForSale)) {
       return NextResponse.json({ error: "Ein Produkt ist nicht mehr verfügbar. Bitte Warenkorb aktualisieren." }, { status: 409 });
     }
 
     const consent = body.consent;
-    const hasDigital = resolved.some((line) => line.match?.product.kind !== "physical");
-    const hasPhysical = resolved.some((line) => line.match?.product.kind === "physical");
+    const hasDigital = resolved.some((line) => line.match?.kind !== "physical");
+    const hasPhysical = resolved.some((line) => line.match?.requiresShipping || line.match?.kind === "physical");
     assertCheckoutReady({ requiresPhysical: hasPhysical });
     if (consent?.termsAccepted !== true) return NextResponse.json({ error: "Bitte AGB und Widerrufsbelehrung bestätigen." }, { status: 400 });
     if (hasDigital && (consent.digitalSupplyConsent !== true || consent.digitalWithdrawalAcknowledged !== true)) {
       return NextResponse.json({ error: "Für digitale Inhalte fehlen die beiden ausdrücklichen Zustimmungen." }, { status: 400 });
     }
 
-    const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
     const cart = await createCheckout(
       requested,
-      { terms: true, digitalSupply: consent.digitalSupplyConsent === true, digitalWithdrawal: consent.digitalWithdrawalAcknowledged === true },
-      forwarded,
+      {
+        terms: true,
+        digitalSupply: consent.digitalSupplyConsent === true,
+        digitalWithdrawal: consent.digitalWithdrawalAcknowledged === true,
+        recordedAt: new Date().toISOString(),
+      },
+      buyerIp,
     );
     return NextResponse.json({ checkoutUrl: cart.checkoutUrl }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
