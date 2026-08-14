@@ -42,7 +42,7 @@ npm run verify:config
 4. Demo-Produkte aus [shopify/demo-products.csv](shopify/demo-products.csv) importieren.
 5. Metafelder gemäß [shopify/METAFIELDS.md](shopify/METAFIELDS.md) anlegen und ausfüllen.
 6. Digitale Varianten als nicht physisch konfigurieren (`requiresShipping=false`).
-7. Shopify Digital Downloads oder eine geeignete Download-/Lizenz-App einrichten.
+7. Shopify Digital Products oder eine geeignete Download-/Lizenz-App einrichten; der verifizierte Demo-Aufbau ist in [docs/DEMO_FULFILLMENT.md](docs/DEMO_FULFILLMENT.md) dokumentiert.
 8. Markets für Deutschland und EUR aktivieren; Steuer- und Versandprofile prüfen.
 
 Verwendete Storefront API: `2026-07`. Shopify veröffentlicht vierteljährlich eine neue stabile Version; mindestens einmal pro Quartal prüfen und aktualisieren.
@@ -68,6 +68,8 @@ Die Storefront erstellt den Warenkorb serverseitig über `cartCreate` und leitet
 Ein Warenkorb mit physischen Produkten wird im Live-Modus zusätzlich serverseitig gesperrt, solange keine `LEGAL_LUCID_NUMBER` hinterlegt ist. Shopify-Domain und öffentliche URL werden vor jeder Checkout-Freigabe streng validiert.
 
 Der endgültige Shopify Checkout, Bestellbutton und die Bestätigungs-E-Mails müssen im echten Shop auf Deutsch und mit einer vollständigen Testbestellung geprüft werden.
+
+Die drei digitalen Demo-Produkte besitzen bereits getrennte Assets in Shopify Digital Products. Die aktuelle Demo-Auslieferung und die vor Livegang zu ersetzenden beziehungsweise zu prüfenden Teile stehen in [docs/DEMO_FULFILLMENT.md](docs/DEMO_FULFILLMENT.md).
 
 ## Elektronischer Widerruf
 
