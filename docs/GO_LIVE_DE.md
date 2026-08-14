@@ -76,6 +76,7 @@ Primärquellen:
 
 - Digitale Varianten in Shopify als nicht physisch konfigurieren; keine Versandkosten.
 - Geeignete Download-/Lizenz-App installieren, Zugriff und E-Mail testen.
+- Vorhandene Demo-Handoffs aus [DEMO_FULFILLMENT.md](DEMO_FULFILLMENT.md) durch den freigegebenen, bestellungsgebundenen Live-Auslieferungsweg ersetzen oder fachlich ausdrücklich abnehmen.
 - Funktionalität, Dateiformat, Größe, DRM, Kompatibilität, Interoperabilität, Systemanforderungen und Update-Zeitraum angeben.
 - Lizenzumfang klar beschreiben: Geräte/Nutzer, kommerzielle Nutzung, Weitergabe, Bearbeitung, Laufzeit und Gebiet.
 - Rechtekette für Quellcode, Samples, Fonts, Modelle, Trainings-/Ausgaberechte und Drittkomponenten dokumentieren.

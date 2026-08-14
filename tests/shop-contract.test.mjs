@@ -77,5 +77,15 @@ test("published go-live runbook stays in sync with its source", async () => {
     readFile(new URL("../docs/GO_LIVE_DE.md", import.meta.url), "utf8"),
     readFile(new URL("../public/GO_LIVE_DE.md", import.meta.url), "utf8"),
   ]);
-  assert.equal(published, source);
+  const normalizeLineEndings = (value) => value.replace(/\r\n/g, "\n");
+  assert.equal(normalizeLineEndings(published), normalizeLineEndings(source));
+});
+
+test("published demo fulfillment guide stays in sync with its source", async () => {
+  const [source, published] = await Promise.all([
+    readFile(new URL("../docs/DEMO_FULFILLMENT.md", import.meta.url), "utf8"),
+    readFile(new URL("../public/DEMO_FULFILLMENT.md", import.meta.url), "utf8"),
+  ]);
+  const normalizeLineEndings = (value) => value.replace(/\r\n/g, "\n");
+  assert.equal(normalizeLineEndings(published), normalizeLineEndings(source));
 });
