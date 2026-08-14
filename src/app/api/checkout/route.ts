@@ -37,6 +37,8 @@ export async function POST(request: Request) {
 
     const consent = body.consent;
     const hasDigital = resolved.some((line) => line.match?.product.kind !== "physical");
+    const hasPhysical = resolved.some((line) => line.match?.product.kind === "physical");
+    assertCheckoutReady({ requiresPhysical: hasPhysical });
     if (consent?.termsAccepted !== true) return NextResponse.json({ error: "Bitte AGB und Widerrufsbelehrung bestätigen." }, { status: 400 });
     if (hasDigital && (consent.digitalSupplyConsent !== true || consent.digitalWithdrawalAcknowledged !== true)) {
       return NextResponse.json({ error: "Für digitale Inhalte fehlen die beiden ausdrücklichen Zustimmungen." }, { status: 400 });

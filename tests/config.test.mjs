@@ -39,3 +39,14 @@ test("live configuration rejects localhost and missing transactional email", () 
   assert.ok(result.errors.some((error) => error.includes("HTTPS")));
   assert.ok(result.errors.some((error) => error.includes("localhost")));
 });
+
+test("live configuration rejects an unsafe Shopify host and a non-HTTPS public URL", () => {
+  const result = validateEnv({
+    ...complete,
+    SHOPIFY_STORE_DOMAIN: "attacker.example",
+    NEXT_PUBLIC_SITE_URL: "http://shop.example.de",
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.includes("myshopify.com")));
+  assert.ok(result.errors.some((error) => error.includes("HTTPS")));
+});

@@ -1,4 +1,19 @@
+import "server-only";
+
 const value = (key: string) => process.env[key]?.trim() ?? "";
+
+function isPublicHttpsUrl(candidate: string) {
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "https:" && !["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isShopifyDomain(candidate: string) {
+  return /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i.test(candidate);
+}
 
 export const storeConfig = {
   mode: value("SHOP_MODE") === "live" ? "live" : "demo",
@@ -36,22 +51,23 @@ export const emailConfig = {
 
 export const readiness = {
   liveMode: storeConfig.mode === "live",
-  shopify: Boolean(shopifyConfig.domain && (shopifyConfig.privateToken || shopifyConfig.publicToken)),
+  shopify: Boolean(isShopifyDomain(shopifyConfig.domain) && (shopifyConfig.privateToken || shopifyConfig.publicToken)),
   merchant: ["LEGAL_NAME", "LEGAL_OWNER", "LEGAL_STREET", "LEGAL_POSTCODE", "LEGAL_CITY", "LEGAL_EMAIL", "LEGAL_PHONE"].every(
     (key) => Boolean(value(key)),
   ),
   revocationEmail: Boolean(emailConfig.apiKey && emailConfig.from && emailConfig.merchant),
   lucid: Boolean(value("LEGAL_LUCID_NUMBER")),
-  siteUrl: Boolean(value("NEXT_PUBLIC_SITE_URL") && value("NEXT_PUBLIC_SITE_URL") !== "http://localhost:3000"),
+  siteUrl: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
 };
 
-export function assertCheckoutReady() {
+export function assertCheckoutReady({ requiresPhysical = false }: { requiresPhysical?: boolean } = {}) {
   const missing: string[] = [];
   if (!readiness.liveMode) missing.push("SHOP_MODE=live");
   if (!readiness.shopify) missing.push("Shopify Storefront API");
   if (!readiness.merchant) missing.push("Händlerpflichtangaben");
   if (!readiness.revocationEmail) missing.push("Widerrufs-E-Mail");
   if (!readiness.siteUrl) missing.push("öffentliche Shop-URL");
+  if (requiresPhysical && !readiness.lucid) missing.push("LUCID-Registrierung für physischen Versand");
   if (missing.length) {
     throw new Error(`Checkout ist noch nicht freigegeben: ${missing.join(", ")}`);
   }

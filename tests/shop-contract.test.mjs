@@ -15,6 +15,15 @@ test("digital checkout requires separate supply and withdrawal acknowledgements"
   assert.match(source, /createCheckout/);
 });
 
+test("physical checkout is gated by LUCID readiness", async () => {
+  const [checkout, config] = await Promise.all([
+    readFile(new URL("../src/app/api/checkout/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/lib/config.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(checkout, /requiresPhysical: hasPhysical/);
+  assert.match(config, /LUCID-Registrierung für physischen Versand/);
+});
+
 test("demo mode prevents indexing and checkout", async () => {
   const [robots, config] = await Promise.all([
     readFile(new URL("../src/app/robots.ts", import.meta.url), "utf8"),

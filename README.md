@@ -65,6 +65,8 @@ Die Storefront erstellt den Warenkorb serverseitig über `cartCreate` und leitet
 - Beginn der Bereitstellung vor Ablauf der Widerrufsfrist,
 - Kenntnis vom Erlöschen des Widerrufsrechts.
 
+Ein Warenkorb mit physischen Produkten wird im Live-Modus zusätzlich serverseitig gesperrt, solange keine `LEGAL_LUCID_NUMBER` hinterlegt ist. Shopify-Domain und öffentliche URL werden vor jeder Checkout-Freigabe streng validiert.
+
 Der endgültige Shopify Checkout, Bestellbutton und die Bestätigungs-E-Mails müssen im echten Shop auf Deutsch und mit einer vollständigen Testbestellung geprüft werden.
 
 ## Elektronischer Widerruf

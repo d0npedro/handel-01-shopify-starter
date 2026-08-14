@@ -9,6 +9,7 @@ const checks = [
   { key: "shopify", label: "Shopify verbunden", detail: "Domain und Storefront-Token aus dem Headless-Kanal." },
   { key: "merchant", label: "Händlerdaten vollständig", detail: "Name, Vertretung, ladungsfähige Anschrift, E-Mail und Telefon." },
   { key: "revocationEmail", label: "Widerrufszustellung aktiv", detail: "Resend-Schlüssel, Absender und Händler-E-Mail." },
+  { key: "lucid", label: "Physischer Versand registriert", detail: "LUCID-Nummer erforderlich, sobald physische Produkte bestellt werden können." },
   { key: "siteUrl", label: "Öffentliche Domain gesetzt", detail: "NEXT_PUBLIC_SITE_URL muss die kanonische HTTPS-Adresse sein." },
 ] as const;
 
@@ -16,7 +17,7 @@ export default function ReadinessPage() {
   const passed = checks.filter((check) => readiness[check.key]).length;
   return (
     <div className="readiness-page">
-      <header><div><p className="eyebrow">Production Gate</p><h1>{passed}/{checks.length}<br /><em>bereit.</em></h1></div><p>Dieser Status prüft keine geheimen Werte öffentlich, sondern nur, ob die erforderlichen Konfigurationsgruppen vorhanden sind. Der Checkout bleibt im Demo-Modus gesperrt.</p></header>
+      <header><div><p className="eyebrow">Production Gate</p><h1>{passed}/{checks.length}<br /><em>bereit.</em></h1></div><p>Dieser Status prüft keine geheimen Werte öffentlich, sondern nur, ob die erforderlichen Konfigurationsgruppen vorhanden sind. {storeConfig.mode === "demo" ? "Der Checkout bleibt im Demo-Modus gesperrt." : "Der Live-Modus ist aktiv; die manuellen Gates bleiben verbindlich."}</p></header>
       <section className="readiness-list" aria-label="Go-live-Prüfungen">
         {checks.map((check, index) => <article key={check.key} className={readiness[check.key] ? "is-ready" : "is-open"}><span>{String(index + 1).padStart(2, "0")}</span><div><h2>{check.label}</h2><p>{check.detail}</p></div><strong>{readiness[check.key] ? "BEREIT" : "OFFEN"}</strong></article>)}
       </section>

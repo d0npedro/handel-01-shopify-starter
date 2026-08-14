@@ -34,6 +34,11 @@ export function validateEnv(env) {
     }
   }
 
+  const shopifyDomain = env.SHOPIFY_STORE_DOMAIN?.trim() ?? "";
+  if (shopifyDomain && !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i.test(shopifyDomain)) {
+    errors.push("SHOPIFY_STORE_DOMAIN muss eine gültige *.myshopify.com-Domain sein.");
+  }
+
   if (!env.LEGAL_LUCID_NUMBER?.trim()) warnings.push("Keine LUCID-Nummer gesetzt; physischer Versand darf ohne geklärte Verpackungspflichten nicht starten.");
   if (!env.LEGAL_VAT_ID?.trim()) warnings.push("Keine USt-IdNr. gesetzt; prüfen, ob eine vorhanden und im Impressum anzugeben ist.");
   return { live, errors, warnings, ok: live && errors.length === 0 };
