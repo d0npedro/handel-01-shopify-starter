@@ -37,7 +37,7 @@ export const demoProducts: Product[] = [
     vendor: "HANDEL/01",
     tags: ["Demo", "Physisch", "GPSR"],
     variants: [variant("modular-desk-kit", "79.00", true, "99.00")],
-    deliveryNote: "Lieferzeit 2–4 Werktage innerhalb Deutschlands",
+    deliveryNote: "Standard 3–5 Werktage; Express 1–2 Werktage innerhalb Deutschlands",
     lowestPrice30Days: "89,00 €",
     highlights: ["Pulverbeschichteter Stahl", "Rutschfester Kork", "Plastikarm verpackt"],
     manufacturer: demoManufacturer,
