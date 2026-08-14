@@ -71,6 +71,15 @@ export const readiness = {
   siteUrl: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
 };
 
+export const preproductionReadiness = {
+  safeDemoMode: storeConfig.mode === "demo",
+  publicPreview: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
+  shopifyDraft: Boolean(isShopifyDomain(shopifyConfig.domain) && shopifyConfig.apiVersion === STOREFRONT_API_VERSION),
+  emailProvider: Boolean(emailConfig.apiKey && isEmailAddress(emailConfig.from)),
+};
+
+export const preproductionReady = Object.values(preproductionReadiness).every(Boolean);
+
 export function assertCheckoutReady({ requiresPhysical = false }: { requiresPhysical?: boolean } = {}) {
   const missing: string[] = [];
   if (!readiness.liveMode) missing.push("SHOP_MODE=live");

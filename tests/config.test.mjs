@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateEnv } from "../scripts/verify-config.mjs";
+import { validateEnv, validatePreproductionEnv } from "../scripts/verify-config.mjs";
 
 const complete = {
   SHOP_MODE: "live",
@@ -18,6 +18,45 @@ const complete = {
   RESEND_API_KEY: "re_test",
   REVOCATION_EMAIL_FROM: "widerruf@example.de",
 };
+
+const preproduction = {
+  SHOP_MODE: "demo",
+  NEXT_PUBLIC_SITE_URL: "https://preprod.example.de",
+  SHOPIFY_STORE_DOMAIN: "example.myshopify.com",
+  SHOPIFY_STOREFRONT_API_VERSION: "2026-07",
+  RESEND_API_KEY: "re_test",
+  REVOCATION_EMAIL_FROM: "widerruf@example.de",
+};
+
+test("pre-production passes without live merchant data or Storefront token", () => {
+  const result = validatePreproductionEnv(preproduction);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.errors, []);
+  assert.ok(result.warnings.some((warning) => warning.includes("Demo-Katalog")));
+});
+
+test("pre-production requires demo mode, public HTTPS, Shopify draft config and email transport", () => {
+  const result = validatePreproductionEnv({
+    ...preproduction,
+    SHOP_MODE: "live",
+    NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
+    SHOPIFY_STORE_DOMAIN: "invalid.example",
+    SHOPIFY_STOREFRONT_API_VERSION: "unstable",
+    RESEND_API_KEY: "",
+    REVOCATION_EMAIL_FROM: "invalid",
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.includes("SHOP_MODE")));
+  assert.ok(result.errors.some((error) => error.includes("localhost")));
+  assert.ok(result.errors.some((error) => error.includes("myshopify.com")));
+  assert.ok(result.errors.some((error) => error.includes("RESEND_API_KEY")));
+});
+
+test("pre-production rejects secrets exposed through NEXT_PUBLIC variables", () => {
+  const result = validatePreproductionEnv({ ...preproduction, NEXT_PUBLIC_SHOPIFY_TOKEN: "never-public" });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.includes("NEXT_PUBLIC_SHOPIFY_TOKEN")));
+});
 
 test("live configuration passes with all required groups", () => {
   const result = validateEnv(complete);

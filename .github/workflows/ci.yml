@@ -14,7 +14,11 @@ jobs:
     timeout-minutes: 15
     env:
       SHOP_MODE: demo
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: https://preprod.example.test
+      SHOPIFY_STORE_DOMAIN: preprod-example.myshopify.com
+      SHOPIFY_STOREFRONT_API_VERSION: 2026-07
+      RESEND_API_KEY: re_ci_placeholder
+      REVOCATION_EMAIL_FROM: widerruf@example.test
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -25,4 +29,5 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run verify:preprod
       - run: npm run build
