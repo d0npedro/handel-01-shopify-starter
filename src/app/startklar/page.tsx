@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Go-live-Status", robots: { index: fa
 
 const checks = [
   { key: "liveMode", label: "Live-Modus", detail: "SHOP_MODE=live erst nach allen Prüfungen setzen." },
-  { key: "shopify", label: "Shopify verbunden", detail: "Domain und Storefront-Token aus dem Headless-Kanal." },
+  { key: "shopify", label: "Shopify verbunden", detail: "Domain, Storefront-Token und getestete API-Version 2026-07." },
   { key: "merchant", label: "Händlerdaten vollständig", detail: "Name, Vertretung, ladungsfähige Anschrift, E-Mail und Telefon." },
   { key: "revocationEmail", label: "Widerrufszustellung aktiv", detail: "Resend-Schlüssel, Absender und Händler-E-Mail." },
   { key: "lucid", label: "Physischer Versand registriert", detail: "LUCID-Nummer erforderlich, sobald physische Produkte bestellt werden können." },

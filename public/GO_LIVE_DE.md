@@ -51,6 +51,7 @@ Primärquellen:
 - Zweite Schaltfläche eindeutig mit „Widerruf bestätigen“ beschriften.
 - Unmittelbar eine Bestätigung auf dauerhaftem Datenträger mit Inhalt, Datum und Uhrzeit senden.
 - Absenderdomain und Resend-Zustellung testen; bei Störung muss eine alternative E-Mail-/Postadresse funktionieren.
+- `/api/widerruf` und `/api/checkout` zusätzlich per Vercel Firewall begrenzen; Missbrauchs-, Größen- und Origin-Fehlerpfade testen.
 - Für sofortige digitale Bereitstellung zwei ausdrückliche Bestätigungen erfassen und in Bestellung/Vertragsbestätigung nachweisbar speichern.
 
 Primärquellen:

@@ -21,7 +21,11 @@ export function RevocationForm({ enabled }: { enabled: boolean }) {
     event.preventDefault();
     setError("");
     if (!fields.name || !fields.email || !fields.orderNumber) {
-      setError("Bitte Name, E-Mail-Adresse und Bestellnummer vollständig angeben.");
+      setError("Bitte Name, E-Mail-Adresse und eine Vertragsangabe vollständig angeben.");
+      return;
+    }
+    if (fields.scope.startsWith("Teil") && !fields.note.trim()) {
+      setError("Bitte beschreibe im Hinweis, welchen Teil des Vertrags du widerrufen möchtest.");
       return;
     }
     setStep("review");
@@ -78,7 +82,7 @@ export function RevocationForm({ enabled }: { enabled: boolean }) {
         <dl>
           <div><dt>Name</dt><dd>{fields.name}</dd></div>
           <div><dt>E-Mail</dt><dd>{fields.email}</dd></div>
-          <div><dt>Bestellnummer</dt><dd>{fields.orderNumber}</dd></div>
+          <div><dt>Vertragsangabe</dt><dd>{fields.orderNumber}</dd></div>
           <div><dt>Umfang</dt><dd>{fields.scope}</dd></div>
           {fields.note ? <div><dt>Hinweis</dt><dd>{fields.note}</dd></div> : null}
         </dl>
@@ -98,9 +102,9 @@ export function RevocationForm({ enabled }: { enabled: boolean }) {
       <div className="form-heading"><p className="eyebrow">Schritt 1 von 2</p><h2>Vertrag zuordnen</h2><p>Eine Begründung ist nicht erforderlich. Pflichtfelder sind mit * markiert.</p></div>
       <label>Vollständiger Name *<input autoComplete="name" value={fields.name} onChange={(event) => update("name", event.target.value)} required maxLength={120} /></label>
       <label>E-Mail für die Eingangsbestätigung *<input type="email" autoComplete="email" value={fields.email} onChange={(event) => update("email", event.target.value)} required maxLength={254} /></label>
-      <label>Bestellnummer *<input autoComplete="off" value={fields.orderNumber} onChange={(event) => update("orderNumber", event.target.value)} required maxLength={80} /></label>
+      <label>Bestellnummer oder andere eindeutige Vertragsangabe *<input autoComplete="off" value={fields.orderNumber} onChange={(event) => update("orderNumber", event.target.value)} required maxLength={80} /></label>
       <label>Umfang des Widerrufs<select value={fields.scope} onChange={(event) => update("scope", event.target.value)}><option>gesamter Vertrag</option><option>Teil des Vertrags (unten beschreiben)</option></select></label>
-      <label>Optionaler Hinweis<textarea value={fields.note} onChange={(event) => update("note", event.target.value)} maxLength={1000} rows={4} /></label>
+      <label>Hinweis {fields.scope.startsWith("Teil") ? "*" : "(optional)"}<textarea value={fields.note} onChange={(event) => update("note", event.target.value)} required={fields.scope.startsWith("Teil")} maxLength={1000} rows={4} /></label>
       <label className="honey" aria-hidden="true">Firma<input tabIndex={-1} autoComplete="off" value={fields.company} onChange={(event) => update("company", event.target.value)} /></label>
       <p className="privacy-note">Die Angaben werden ausschließlich zur Bearbeitung des Widerrufs verarbeitet. Details stehen in der Datenschutzerklärung.</p>
       {error ? <p className="form-error" role="alert">{error}</p> : null}

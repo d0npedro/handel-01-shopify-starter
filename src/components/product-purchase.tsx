@@ -50,7 +50,8 @@ export function ProductPurchase({ product }: { product: Product }) {
         <span>Gesamtpreis</span>
         <div><strong>{formatMoney(variant.price)}</strong>{variant.compareAtPrice ? <del>{formatMoney(variant.compareAtPrice)}</del> : null}</div>
       </div>
-      <p className="tax-note">inkl. MwSt. {variant.requiresShipping ? "zzgl. Versandkosten" : "· keine Versandkosten"}</p>
+      <p className="tax-note">inkl. MwSt. {variant.requiresShipping ? <Link href="/versand-zahlung">zzgl. Versandkosten</Link> : "· keine Versandkosten"}</p>
+      {variant.compareAtPrice && product.lowestPrice30Days ? <p className="fine-print">Niedrigster Gesamtpreis der letzten 30 Tage: {product.lowestPrice30Days}</p> : null}
       <button className="button button--primary button--full" onClick={add} disabled={!variant.availableForSale}>
         {variant.availableForSale ? "In den Warenkorb" : "Aktuell nicht verfügbar"}
       </button>

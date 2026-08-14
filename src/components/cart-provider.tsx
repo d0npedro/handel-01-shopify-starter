@@ -18,18 +18,25 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 function safeLines(value: unknown): CartLine[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is CartLine => {
+  return value.slice(0, 25).filter((item): item is CartLine => {
     if (!item || typeof item !== "object") return false;
     const line = item as Partial<CartLine>;
     return Boolean(
       typeof line.variantId === "string" &&
         typeof line.handle === "string" &&
         typeof line.title === "string" &&
+        typeof line.variantTitle === "string" &&
+        ["physical", "script", "music", "software"].includes(line.kind ?? "") &&
         typeof line.quantity === "number" &&
+        Number.isInteger(line.quantity) &&
         line.quantity > 0 &&
+        line.quantity <= 10 &&
         line.price &&
         typeof line.price.amount === "string" &&
-        typeof line.price.currencyCode === "string",
+        Number.isFinite(Number(line.price.amount)) &&
+        Number(line.price.amount) >= 0 &&
+        typeof line.price.currencyCode === "string" &&
+        /^[A-Z]{3}$/.test(line.price.currencyCode),
     );
   });
 }
@@ -53,7 +60,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+    } catch {
+      // Private browsing or a full storage quota must not break the cart UI.
+    }
   }, [hydrated, lines]);
 
   const addLine = useCallback((line: CartLine) => {

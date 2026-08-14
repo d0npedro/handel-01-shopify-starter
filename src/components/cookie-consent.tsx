@@ -30,7 +30,7 @@ export function CookieConsent() {
 
   if (!open) return null;
   return (
-    <section className="consent" aria-labelledby="consent-title" role="dialog" aria-modal="true">
+    <section className="consent" aria-labelledby="consent-title" role="region">
       <div>
         <p className="eyebrow">Deine Entscheidung</p>
         <h2 id="consent-title">Cookies, klar geregelt.</h2>
