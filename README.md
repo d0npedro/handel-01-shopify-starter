@@ -13,6 +13,8 @@ Enthalten sind Demo-Produkte für:
 
 Der Shop startet absichtlich mit `SHOP_MODE=demo`. In diesem Modus sind Demo-Katalog und Warenkorb funktionsfähig, der Shopify Checkout ist aber gesperrt und Suchmaschinen werden über `robots.txt` ausgeschlossen. `SHOP_MODE=live` darf erst gesetzt werden, wenn `npm run verify:config`, Rechtstextprüfung, Testbestellungen und die manuelle Checkliste in [docs/GO_LIVE_DE.md](docs/GO_LIVE_DE.md) bestanden sind.
 
+Die Seite `/startklar` und `/api/health` trennen den grünen Pre-Production-Status ausdrücklich vom strengeren Production-Gate. Ein bestandenes Pre-Production-Gate schwächt `assertCheckoutReady` nicht ab und schaltet weder Checkout noch Indexierung frei.
+
 Die enthaltenen Rechtstexte sind strukturierte Muster und keine Rechtsberatung. Sie müssen auf Unternehmen, Rechtsform, Sortiment, Apps, Datenflüsse, Zahlungsarten und Märkte angepasst und fachlich geprüft werden.
 
 ## Lokal starten
@@ -31,8 +33,11 @@ Qualitätsprüfung:
 
 ```powershell
 npm run check
+npm run verify:preprod
 npm run verify:config
 ```
+
+`verify:preprod` bestätigt den sicheren Demo-Modus, eine öffentliche HTTPS-Preview, die vorbereitete Shopify-Domain/API-Version, den serverseitigen E-Mail-Transport und alle Demo-Downloadartefakte. Das strengere `verify:config` bleibt ausschließlich das Live-Gate und darf in Pre-Production fehlschlagen.
 
 ## Shopify verbinden
 

@@ -72,6 +72,22 @@ test("write APIs require exact same-origin JSON requests", async () => {
   assert.match(revocation, /isJsonRequest/);
 });
 
+test("pre-production status stays separate from the production checkout gate", async () => {
+  const [health, readinessPage, config] = await Promise.all([
+    readFile(new URL("../src/app/api/health/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/startklar/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/lib/config.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(health, /preproduction: \{ ready: preproductionReady/);
+  assert.match(health, /production: \{ ready: Object\.values\(readiness\)\.every\(Boolean\)/);
+  assert.match(health, /checks: readiness/);
+  assert.match(readinessPage, /Pre-Production Gate/);
+  assert.match(readinessPage, /Production Gate/);
+  assert.match(readinessPage, /verify:preprod/);
+  assert.match(config, /export const preproductionReady/);
+  assert.match(config, /export function assertCheckoutReady/);
+});
+
 test("published go-live runbook stays in sync with its source", async () => {
   const [source, published] = await Promise.all([
     readFile(new URL("../docs/GO_LIVE_DE.md", import.meta.url), "utf8"),

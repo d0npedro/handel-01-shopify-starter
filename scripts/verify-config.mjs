@@ -9,6 +9,44 @@ export const liveRequirements = {
   "Widerrufszustellung": ["RESEND_API_KEY", "REVOCATION_EMAIL_FROM"],
 };
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const shopifyDomainPattern = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i;
+
+export function validatePreproductionEnv(env) {
+  const errors = [];
+  const warnings = [];
+
+  if (env.SHOP_MODE !== "demo") errors.push("SHOP_MODE muss für Pre-Production auf demo stehen.");
+
+  try {
+    const siteUrl = new URL(env.NEXT_PUBLIC_SITE_URL ?? "");
+    if (siteUrl.protocol !== "https:") errors.push("Pre-Production-URL muss HTTPS verwenden.");
+    if (["localhost", "127.0.0.1", "::1"].includes(siteUrl.hostname)) errors.push("Pre-Production-URL darf nicht localhost sein.");
+  } catch {
+    errors.push("NEXT_PUBLIC_SITE_URL ist keine gültige öffentliche URL.");
+  }
+
+  const shopifyDomain = env.SHOPIFY_STORE_DOMAIN?.trim() ?? "";
+  if (!shopifyDomainPattern.test(shopifyDomain)) errors.push("SHOPIFY_STORE_DOMAIN muss eine gültige *.myshopify.com-Domain sein.");
+  if (env.SHOPIFY_STOREFRONT_API_VERSION?.trim() !== "2026-07") {
+    errors.push("SHOPIFY_STOREFRONT_API_VERSION muss bis zum getesteten Upgrade 2026-07 bleiben.");
+  }
+  if (!env.RESEND_API_KEY?.trim()) errors.push("RESEND_API_KEY fehlt für den vorbereiteten Transaktions-E-Mail-Transport.");
+  if (!emailPattern.test(env.REVOCATION_EMAIL_FROM?.trim() ?? "")) {
+    errors.push("REVOCATION_EMAIL_FROM ist keine gültige E-Mail-Adresse.");
+  }
+
+  const publicSecrets = Object.entries(env)
+    .filter(([key, value]) => key.startsWith("NEXT_PUBLIC_") && /(TOKEN|SECRET|KEY)/i.test(key) && value?.trim())
+    .map(([key]) => key);
+  if (publicSecrets.length) errors.push(`Server-Secrets dürfen nicht öffentlich exponiert werden: ${publicSecrets.join(", ")}.`);
+
+  if (!env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN?.trim() && !env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN?.trim()) {
+    warnings.push("Kein Storefront-Token gesetzt; der Demo-Katalog bleibt die absichtliche Pre-Production-Datenquelle.");
+  }
+  return { errors, warnings, ok: errors.length === 0 };
+}
+
 export function validateEnv(env) {
   const errors = [];
   const warnings = [];
@@ -43,7 +81,6 @@ export function validateEnv(env) {
     errors.push("SHOPIFY_STOREFRONT_API_VERSION muss bis zum getesteten Upgrade 2026-07 bleiben.");
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (env.LEGAL_EMAIL?.trim() && !emailPattern.test(env.LEGAL_EMAIL.trim())) errors.push("LEGAL_EMAIL ist keine gültige E-Mail-Adresse.");
   if (env.REVOCATION_EMAIL_FROM?.trim() && !emailPattern.test(env.REVOCATION_EMAIL_FROM.trim())) errors.push("REVOCATION_EMAIL_FROM ist keine gültige E-Mail-Adresse.");
   if (env.LEGAL_POSTCODE?.trim() && !/^\d{5}$/.test(env.LEGAL_POSTCODE.trim())) errors.push("LEGAL_POSTCODE muss für Deutschland aus fünf Ziffern bestehen.");
