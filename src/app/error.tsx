@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <section className="not-found"><span>500</span><div><p className="eyebrow">Systemhinweis</p><h1>Das hat noch<br />nicht funktioniert.</h1><p>Bitte versuche es erneut. Warenkorbdaten bleiben auf deinem Gerät erhalten.</p><button className="button button--primary" onClick={reset}>Erneut versuchen</button></div></section>; }

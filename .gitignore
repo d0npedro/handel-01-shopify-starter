@@ -1,0 +1,15 @@
+node_modules/
+_node_modules_junction/
+.next/
+.vercel/
+.npm-cache/
+.lock-test/
+coverage/
+*.log
+.env
+.env.local
+.env.*.local
+!.env.example
+tsconfig.tsbuildinfo
+.DS_Store
+Thumbs.db
