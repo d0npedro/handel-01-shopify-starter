@@ -13,7 +13,7 @@ type CartContextValue = {
   clear: () => void;
 };
 
-const STORAGE_KEY = "handel01_cart_v1";
+const STORAGE_KEY = "handel01_single_product_cart_v1";
 const CartContext = createContext<CartContextValue | null>(null);
 
 function safeLines(value: unknown): CartLine[] {
@@ -41,7 +41,7 @@ function safeLines(value: unknown): CartLine[] {
   });
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({ children, productHandle }: { children: React.ReactNode; productHandle: string }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -49,7 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     let nextLines: CartLine[] = [];
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      nextLines = stored ? safeLines(JSON.parse(stored)) : [];
+      nextLines = stored ? safeLines(JSON.parse(stored)).filter((line) => line.handle === productHandle) : [];
     } catch {
       nextLines = [];
     }
@@ -57,7 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLines(nextLines);
       setHydrated(true);
     });
-  }, []);
+  }, [productHandle]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -69,16 +69,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [hydrated, lines]);
 
   const addLine = useCallback((line: CartLine) => {
+    if (line.handle !== productHandle) return;
     setLines((current) => {
-      const existing = current.find((item) => item.variantId === line.variantId);
-      if (!existing) return [...current, { ...line, quantity: Math.min(line.quantity, 10) }];
-      return current.map((item) =>
+      const sameProduct = current.filter((item) => item.handle === productHandle);
+      const existing = sameProduct.find((item) => item.variantId === line.variantId);
+      if (!existing) return [...sameProduct, { ...line, quantity: Math.min(line.quantity, 10) }];
+      return sameProduct.map((item) =>
         item.variantId === line.variantId
           ? { ...item, quantity: Math.min(item.quantity + line.quantity, 10) }
           : item,
       );
     });
-  }, []);
+  }, [productHandle]);
 
   const removeLine = useCallback((variantId: string) => {
     setLines((current) => current.filter((item) => item.variantId !== variantId));

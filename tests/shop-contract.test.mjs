@@ -60,6 +60,36 @@ test("checkout resolves every requested variant directly from Shopify", async ()
   assert.match(shopify, /noStore: true/);
 });
 
+test("single-product storefront and checkout reject catalog drift", async () => {
+  const [landing, shopRoute, productRoute, aboutRoute, cart, checkout, shopify, sitemap] = await Promise.all([
+    readFile(new URL("../src/app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/shop/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/produkt/[handle]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/ueber/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/components/cart-provider.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/api/checkout/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/lib/shopify.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/app/sitemap.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(landing, /getPrimaryProduct/);
+  assert.doesNotMatch(landing, /getProducts\(\)/);
+  assert.match(shopRoute, /redirect\("\/"\)/);
+  assert.match(productRoute, /permanentRedirect\("\/"\)/);
+  assert.match(aboutRoute, /permanentRedirect\("\/"\)/);
+  assert.match(cart, /line\.handle === productHandle/);
+  assert.match(cart, /handel01_single_product_cart_v1/);
+  assert.match(shopify, /productHandle: node\.product\.handle/);
+  assert.match(checkout, /productHandle !== storeConfig\.singleProductHandle/);
+  assert.doesNotMatch(sitemap, /getProducts/);
+});
+
+test("landing page publishes product and FAQ structured data with safe JSON serialization", async () => {
+  const source = await readFile(new URL("../src/app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /"@type": "Product"/);
+  assert.match(source, /"@type": "FAQPage"/);
+  assert.match(source, /replace\(\/<\/g, "\\\\u003c"\)/);
+});
+
 test("write APIs require exact same-origin JSON requests", async () => {
   const [validation, checkout, revocation] = await Promise.all([
     readFile(new URL("../src/lib/validation.ts", import.meta.url), "utf8"),

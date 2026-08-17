@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { assertCheckoutReady } from "@/lib/config";
+import { assertCheckoutReady, storeConfig } from "@/lib/config";
 import { createCheckout, getCheckoutVariants } from "@/lib/shopify";
 import { isJsonRequest, sameOrigin } from "@/lib/validation";
 
@@ -35,6 +35,9 @@ export async function POST(request: Request) {
     const resolved = requested.map((line) => ({ ...line, match: variants.get(line.merchandiseId) }));
     if (resolved.some((line) => !line.match?.availableForSale)) {
       return NextResponse.json({ error: "Ein Produkt ist nicht mehr verfügbar. Bitte Warenkorb aktualisieren." }, { status: 409 });
+    }
+    if (resolved.some((line) => line.match?.productHandle !== storeConfig.singleProductHandle)) {
+      return NextResponse.json({ error: "Dieser Checkout akzeptiert ausschließlich den angebotenen Artikel." }, { status: 400 });
     }
 
     const consent = body.consent;

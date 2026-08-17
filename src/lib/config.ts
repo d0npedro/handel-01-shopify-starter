@@ -2,6 +2,7 @@ import "server-only";
 
 const value = (key: string) => process.env[key]?.trim() ?? "";
 export const STOREFRONT_API_VERSION = "2026-07";
+const storeMode = value("SHOP_MODE") === "live" ? "live" : "demo";
 
 function isPublicHttpsUrl(candidate: string) {
   try {
@@ -21,10 +22,11 @@ function isEmailAddress(candidate: string) {
 }
 
 export const storeConfig = {
-  mode: value("SHOP_MODE") === "live" ? "live" : "demo",
+  mode: storeMode,
   name: value("NEXT_PUBLIC_STORE_NAME") || "HANDEL/01",
   tagline: value("NEXT_PUBLIC_STORE_TAGLINE") || "Ein System. Jede Idee.",
   siteUrl: value("NEXT_PUBLIC_SITE_URL") || "http://localhost:3000",
+  singleProductHandle: value("SINGLE_PRODUCT_HANDLE") || (storeMode === "demo" ? "modular-desk-kit" : ""),
   merchant: {
     name: value("LEGAL_NAME") || "[FIRMENNAME EINTRAGEN]",
     owner: value("LEGAL_OWNER") || "[VERTRETUNGSBERECHTIGTE PERSON EINTRAGEN]",
@@ -69,12 +71,17 @@ export const readiness = {
   revocationEmail: Boolean(emailConfig.apiKey && isEmailAddress(emailConfig.from) && isEmailAddress(emailConfig.merchant)),
   lucid: Boolean(value("LEGAL_LUCID_NUMBER")),
   siteUrl: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
+  singleProduct: Boolean(storeConfig.singleProductHandle),
 };
 
 export const preproductionReadiness = {
   safeDemoMode: storeConfig.mode === "demo",
   publicPreview: isPublicHttpsUrl(value("NEXT_PUBLIC_SITE_URL")),
-  shopifyDraft: Boolean(isShopifyDomain(shopifyConfig.domain) && shopifyConfig.apiVersion === STOREFRONT_API_VERSION),
+  shopifyDraft: Boolean(
+    isShopifyDomain(shopifyConfig.domain) &&
+      shopifyConfig.apiVersion === STOREFRONT_API_VERSION &&
+      value("SINGLE_PRODUCT_HANDLE"),
+  ),
   emailProvider: Boolean(emailConfig.apiKey && isEmailAddress(emailConfig.from)),
 };
 
@@ -87,6 +94,7 @@ export function assertCheckoutReady({ requiresPhysical = false }: { requiresPhys
   if (!readiness.merchant) missing.push("Händlerpflichtangaben");
   if (!readiness.revocationEmail) missing.push("Widerrufs-E-Mail");
   if (!readiness.siteUrl) missing.push("öffentliche Shop-URL");
+  if (!readiness.singleProduct) missing.push("SINGLE_PRODUCT_HANDLE");
   if (requiresPhysical && !readiness.lucid) missing.push("LUCID-Registrierung für physischen Versand");
   if (missing.length) {
     throw new Error(`Checkout ist noch nicht freigegeben: ${missing.join(", ")}`);

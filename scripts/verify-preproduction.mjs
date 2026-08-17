@@ -2,46 +2,42 @@ import { open, readFile, stat } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { validatePreproductionEnv } from "./verify-config.mjs";
 
-const requiredAssets = [
-  "public/demo-downloads/launch-automation-script-DEMO.zip",
-  "public/demo-downloads/synthetic-horizons-DEMO.zip",
-  "public/demo-downloads/focusboard-desktop-DEMO.zip",
-];
-
-const requiredProductTitles = ["Modular Desk Kit", "Launch Automation Script", "Synthetic Horizons", "Focusboard Desktop"];
+const socialCardPath = "public/og.png";
 
 export async function validatePreproductionFiles(root = new URL("../", import.meta.url)) {
   const errors = [];
 
-  for (const relativePath of requiredAssets) {
-    const url = new URL(relativePath, root);
+  const socialCardUrl = new URL(socialCardPath, root);
+  try {
+    const metadata = await stat(socialCardUrl);
+    if (metadata.size < 100_000) errors.push(`${socialCardPath} ist unerwartet klein.`);
+    const handle = await open(socialCardUrl, "r");
     try {
-      const metadata = await stat(url);
-      if (metadata.size < 100) errors.push(`${relativePath} ist unerwartet klein.`);
-      const handle = await open(url, "r");
-      try {
-        const signature = Buffer.alloc(4);
-        await handle.read(signature, 0, 4, 0);
-        if (!signature.equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) errors.push(`${relativePath} ist kein gültiges ZIP-Artefakt.`);
-      } finally {
-        await handle.close();
+      const signature = Buffer.alloc(8);
+      await handle.read(signature, 0, 8, 0);
+      if (!signature.equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+        errors.push(`${socialCardPath} ist kein gültiges PNG-Artefakt.`);
       }
-    } catch (error) {
-      errors.push(`${relativePath} fehlt oder ist nicht lesbar: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      await handle.close();
     }
+  } catch (error) {
+    errors.push(`${socialCardPath} fehlt oder ist nicht lesbar: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const [catalog, fulfillment, goLive] = await Promise.all([
+  const [catalog, goLive, landing, shopRoute, productRoute, aboutRoute] = await Promise.all([
     readFile(new URL("shopify/demo-products.csv", root), "utf8"),
-    readFile(new URL("docs/DEMO_FULFILLMENT.md", root), "utf8"),
     readFile(new URL("docs/GO_LIVE_DE.md", root), "utf8"),
+    readFile(new URL("src/app/page.tsx", root), "utf8"),
+    readFile(new URL("src/app/shop/page.tsx", root), "utf8"),
+    readFile(new URL("src/app/produkt/[handle]/page.tsx", root), "utf8"),
+    readFile(new URL("src/app/ueber/page.tsx", root), "utf8"),
   ]);
-  for (const title of requiredProductTitles) {
-    if (!catalog.includes(title)) errors.push(`Demo-Katalog enthält ${title} nicht.`);
-  }
-  for (const title of requiredProductTitles.slice(1)) {
-    if (!fulfillment.includes(title)) errors.push(`Fulfillment-Dokumentation enthält ${title} nicht.`);
-  }
+  if (!catalog.includes("modular-desk-kit")) errors.push("Demo-Katalog enthält den konfigurierten Standardartikel nicht.");
+  if (!landing.includes("getPrimaryProduct") || landing.includes("getProducts()")) errors.push("Landingpage ist nicht strikt auf den Primärartikel begrenzt.");
+  if (!shopRoute.includes('redirect("/")')) errors.push("Legacy-Shoproute leitet nicht auf die Ein-Produkt-Landingpage um.");
+  if (!productRoute.includes('permanentRedirect("/")')) errors.push("Legacy-Produktdetailroute leitet nicht kanonisch auf die Landingpage um.");
+  if (!aboutRoute.includes('permanentRedirect("/")')) errors.push("Legacy-Systemroute widerspricht der fokussierten Landingpage.");
   if (!goLive.includes("SHOP_MODE=live")) errors.push("Go-live-Runbook dokumentiert das Live-Gate nicht.");
 
   return { errors, ok: errors.length === 0 };
@@ -58,7 +54,7 @@ async function main() {
     return;
   }
   console.log("Pre-Production-Gate: BESTANDEN");
-  console.log("Demo-Modus, öffentliche Preview, Shopify-Entwurf, E-Mail-Transport und Demo-Artefakte sind vorbereitet.");
+  console.log("Demo-Modus, öffentliche Preview, Primärartikel, E-Mail-Transport und Social Preview sind vorbereitet.");
   console.log("Das Live-Gate bleibt separat und darf dadurch nicht umgangen werden.");
 }
 
