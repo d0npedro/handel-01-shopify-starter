@@ -5,12 +5,14 @@ export const liveRequirements = {
   "Shopify Storefront": ["SHOPIFY_STORE_DOMAIN"],
   "Shopify Token": ["SHOPIFY_STOREFRONT_PRIVATE_TOKEN", "SHOPIFY_STOREFRONT_PUBLIC_TOKEN"],
   "Shopify API-Version": ["SHOPIFY_STOREFRONT_API_VERSION"],
+  "Einziger Artikel": ["SINGLE_PRODUCT_HANDLE"],
   "Händlerdaten": ["LEGAL_NAME", "LEGAL_OWNER", "LEGAL_STREET", "LEGAL_POSTCODE", "LEGAL_CITY", "LEGAL_EMAIL", "LEGAL_PHONE"],
   "Widerrufszustellung": ["RESEND_API_KEY", "REVOCATION_EMAIL_FROM"],
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const shopifyDomainPattern = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i;
+const productHandlePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function validatePreproductionEnv(env) {
   const errors = [];
@@ -30,6 +32,9 @@ export function validatePreproductionEnv(env) {
   if (!shopifyDomainPattern.test(shopifyDomain)) errors.push("SHOPIFY_STORE_DOMAIN muss eine gültige *.myshopify.com-Domain sein.");
   if (env.SHOPIFY_STOREFRONT_API_VERSION?.trim() !== "2026-07") {
     errors.push("SHOPIFY_STOREFRONT_API_VERSION muss bis zum getesteten Upgrade 2026-07 bleiben.");
+  }
+  if (!productHandlePattern.test(env.SINGLE_PRODUCT_HANDLE?.trim() ?? "")) {
+    errors.push("SINGLE_PRODUCT_HANDLE muss ein gültiger Shopify-Handle für genau einen Artikel sein.");
   }
   if (!env.RESEND_API_KEY?.trim()) errors.push("RESEND_API_KEY fehlt für den vorbereiteten Transaktions-E-Mail-Transport.");
   if (!emailPattern.test(env.REVOCATION_EMAIL_FROM?.trim() ?? "")) {
@@ -79,6 +84,9 @@ export function validateEnv(env) {
   }
   if (env.SHOPIFY_STOREFRONT_API_VERSION?.trim() && env.SHOPIFY_STOREFRONT_API_VERSION.trim() !== "2026-07") {
     errors.push("SHOPIFY_STOREFRONT_API_VERSION muss bis zum getesteten Upgrade 2026-07 bleiben.");
+  }
+  if (env.SINGLE_PRODUCT_HANDLE?.trim() && !productHandlePattern.test(env.SINGLE_PRODUCT_HANDLE.trim())) {
+    errors.push("SINGLE_PRODUCT_HANDLE muss ein gültiger Shopify-Handle sein.");
   }
 
   if (env.LEGAL_EMAIL?.trim() && !emailPattern.test(env.LEGAL_EMAIL.trim())) errors.push("LEGAL_EMAIL ist keine gültige E-Mail-Adresse.");

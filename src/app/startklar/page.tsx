@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Pre-Production- und Go-live-Status",
 const preproductionChecks = [
   { key: "safeDemoMode", label: "Sicherer Demo-Modus", detail: "Checkout und Indexierung bleiben bis zur Live-Abnahme gesperrt." },
   { key: "publicPreview", label: "Öffentliche Preview", detail: "Die kanonische HTTPS-Domain ist für Abnahme und Stakeholder erreichbar." },
-  { key: "shopifyDraft", label: "Shopify vorbereitet", detail: "Gültige Shop-Domain und getestete Storefront-API-Version 2026-07 sind hinterlegt." },
+  { key: "shopifyDraft", label: "Shopify vorbereitet", detail: "Shop-Domain, API-Version 2026-07 und der Handle des einzigen Artikels sind hinterlegt." },
   { key: "emailProvider", label: "E-Mail-Transport vorbereitet", detail: "Resend-Schlüssel und verifizierbares Absenderformat sind serverseitig vorhanden." },
 ] as const;
 
@@ -18,6 +18,7 @@ const productionChecks = [
   { key: "revocationEmail", label: "Widerrufszustellung aktiv", detail: "Resend-Schlüssel, Absender und Händler-E-Mail." },
   { key: "lucid", label: "Physischer Versand registriert", detail: "LUCID-Nummer erforderlich, sobald physische Produkte bestellt werden können." },
   { key: "siteUrl", label: "Öffentliche Domain gesetzt", detail: "NEXT_PUBLIC_SITE_URL muss die kanonische HTTPS-Adresse sein." },
+  { key: "singleProduct", label: "Ein Artikel gewählt", detail: "SINGLE_PRODUCT_HANDLE verweist auf genau den Artikel der Landingpage." },
 ] as const;
 
 export default function ReadinessPage() {
@@ -48,7 +49,7 @@ export default function ReadinessPage() {
           <li>Testbestellung für physisch, digital und gemischt inklusive Widerruf durchführen.</li>
         </ol>
       </section>
-      <div className="readiness-actions"><Link className="button button--primary" href="/shop">Demo prüfen</Link><a className="button button--secondary" href="/GO_LIVE_DE.md">Runbook öffnen</a></div>
+      <div className="readiness-actions"><Link className="button button--primary" href="/">Demo prüfen</Link><a className="button button--secondary" href="/GO_LIVE_DE.md">Runbook öffnen</a></div>
       <p className="fine-print">Aktueller Modus: {storeConfig.mode.toUpperCase()}. Pre-Production wird mit <code>npm run verify:preprod</code>, der spätere Livebetrieb zusätzlich mit <code>npm run verify:config</code> geprüft.</p>
     </div>
   );

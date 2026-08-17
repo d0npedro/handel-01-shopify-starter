@@ -15,9 +15,9 @@ export function SiteHeader({ name, demo }: { name: string; demo: boolean }) {
           {name}<sup>DE</sup>
         </Link>
         <nav aria-label="Hauptnavigation">
-          <Link href="/shop">Shop</Link>
-          <Link href="/shop?typ=digital">Digital</Link>
-          <Link href="/ueber">System</Link>
+          <Link href="/#details">Produkt</Link>
+          <Link href="/#lieferung">Lieferung</Link>
+          <Link href="/#fragen">Fragen</Link>
         </nav>
         <CartLink />
       </header>

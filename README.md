@@ -1,8 +1,10 @@
-# HANDEL/01 — Shopify Starter DE
+# HANDEL/01 — Shopify Ein-Produkt-Template DE
 
-Ein modularer, headless Shopify-Shop als Ausgangspunkt für neue Shop-Ideen. Die Storefront läuft mit Next.js 16 auf Vercel; Shopify bleibt die Quelle für Produkte, Varianten, Märkte, Bestand, Steuern und Checkout.
+Ein fokussierter, headless Shopify-Shop für genau einen Artikel. Die Storefront läuft mit Next.js 16 auf Vercel; Shopify bleibt im Live-Modus die einzige Quelle für Produkt, Varianten, Preis, Bestand, Steuern, Warenkorb und Checkout.
 
-Enthalten sind Demo-Produkte für:
+Die Landingpage bündelt Hero, Kaufbox, Nutzenargumente, Lieferinformationen, Produkt- beziehungsweise Digitalpflichten, FAQ und einen abschließenden Kaufimpuls auf einer Seite. `/shop` und alte Produktdetail-URLs leiten kanonisch auf die Startseite um. Der sichtbare Artikel wird ausschließlich über `SINGLE_PRODUCT_HANDLE` gewählt.
+
+Als Produktarten unterstützt das Template weiterhin:
 
 - physische Waren mit Lieferzeit, Hersteller- und GPSR-Sicherheitsangaben,
 - herunterladbare Skripte,
@@ -11,7 +13,7 @@ Enthalten sind Demo-Produkte für:
 
 ## Sicherheitsmodell
 
-Der Shop startet absichtlich mit `SHOP_MODE=demo`. In diesem Modus sind Demo-Katalog und Warenkorb funktionsfähig, der Shopify Checkout ist aber gesperrt und Suchmaschinen werden über `robots.txt` ausgeschlossen. `SHOP_MODE=live` darf erst gesetzt werden, wenn `npm run verify:config`, Rechtstextprüfung, Testbestellungen und die manuelle Checkliste in [docs/GO_LIVE_DE.md](docs/GO_LIVE_DE.md) bestanden sind.
+Der Shop startet absichtlich mit `SHOP_MODE=demo`. In diesem Modus sind Ein-Produkt-Landingpage und Warenkorb funktionsfähig, der Shopify Checkout ist aber gesperrt und Suchmaschinen werden über `robots.txt` ausgeschlossen. `SHOP_MODE=live` darf erst gesetzt werden, wenn `npm run verify:config`, Rechtstextprüfung, Testbestellungen und die manuelle Checkliste in [docs/GO_LIVE_DE.md](docs/GO_LIVE_DE.md) bestanden sind.
 
 Die Seite `/startklar` und `/api/health` trennen den grünen Pre-Production-Status ausdrücklich vom strengeren Production-Gate. Ein bestandenes Pre-Production-Gate schwächt `assertCheckoutReady` nicht ab und schaltet weder Checkout noch Indexierung frei.
 
@@ -37,18 +39,20 @@ npm run verify:preprod
 npm run verify:config
 ```
 
-`verify:preprod` bestätigt den sicheren Demo-Modus, eine öffentliche HTTPS-Preview, die vorbereitete Shopify-Domain/API-Version, den serverseitigen E-Mail-Transport und alle Demo-Downloadartefakte. Das strengere `verify:config` bleibt ausschließlich das Live-Gate und darf in Pre-Production fehlschlagen.
+`verify:preprod` bestätigt den sicheren Demo-Modus, eine öffentliche HTTPS-Preview, Shopify-Domain/API-Version, den gewählten Einzelartikel, den serverseitigen E-Mail-Transport, die Ein-Produkt-Routen und die Social Preview. Das strengere `verify:config` bleibt ausschließlich das Live-Gate und darf in Pre-Production fehlschlagen.
 
 ## Shopify verbinden
 
 1. Shopify-Shop anlegen und den Vertriebskanal **Headless** installieren.
 2. Storefront im Headless-Kanal erstellen.
-3. Store-Domain und privaten Storefront-Token in `.env.local` eintragen.
-4. Demo-Produkte aus [shopify/demo-products.csv](shopify/demo-products.csv) importieren.
+3. Store-Domain, privaten Storefront-Token und den Handle des einzigen Artikels als `SINGLE_PRODUCT_HANDLE` in `.env.local` eintragen.
+4. Den gewünschten Demo-Artikel aus [shopify/demo-products.csv](shopify/demo-products.csv) importieren oder einen eigenen Artikel anlegen.
 5. Metafelder gemäß [shopify/METAFIELDS.md](shopify/METAFIELDS.md) anlegen und ausfüllen.
 6. Digitale Varianten als nicht physisch konfigurieren (`requiresShipping=false`).
 7. Shopify Digital Products oder eine geeignete Download-/Lizenz-App einrichten; der verifizierte Demo-Aufbau ist in [docs/DEMO_FULFILLMENT.md](docs/DEMO_FULFILLMENT.md) dokumentiert.
 8. Markets für Deutschland und EUR aktivieren; Steuer- und Versandprofile prüfen.
+
+Beim Austausch des Demo-Artikels zusätzlich `public/og.png` durch eine zum neuen Produkt passende Social Card ersetzen. Verfügt der Shopify-Artikel über ein Featured Image, verwendet die Landingpage dieses automatisch als sichtbares Produktbild.
 
 Verwendete Storefront API: `2026-07`. Shopify veröffentlicht vierteljährlich eine neue stabile Version; mindestens einmal pro Quartal prüfen und aktualisieren.
 
@@ -90,7 +94,7 @@ Ohne diese Werte ist die Übermittlung sichtbar deaktiviert. Vor Livegang Absend
 
 ## Vercel
 
-Alle Variablen aus `.env.example` im Vercel-Projekt setzen. Zunächst im Demo-Modus deployen, Domain und alle Seiten prüfen, danach erst die Live-Gates abschließen.
+Alle Variablen aus `.env.example` im Vercel-Projekt setzen. `SINGLE_PRODUCT_HANDLE` muss exakt dem veröffentlichten Shopify-Handle entsprechen. Zunächst im Demo-Modus deployen, Domain und alle Seiten prüfen, danach erst die Live-Gates abschließen.
 
 ```powershell
 vercel deploy -y

@@ -42,6 +42,7 @@ type ShopifyCheckoutVariantNode = {
   availableForSale: boolean;
   requiresShipping: boolean;
   product: {
+    handle: string;
     productType: string;
     tags: string[];
     productKind: ShopifyMetafield;
@@ -50,6 +51,7 @@ type ShopifyCheckoutVariantNode = {
 
 export type CheckoutVariant = {
   id: string;
+  productHandle: string;
   availableForSale: boolean;
   requiresShipping: boolean;
   kind: ProductKind;
@@ -220,6 +222,14 @@ export const getProduct = cache(async (handle: string): Promise<Product | undefi
   }
 });
 
+export const getPrimaryProduct = cache(async (): Promise<Product> => {
+  const handle = storeConfig.singleProductHandle;
+  if (!handle) throw new Error("Für den Ein-Produkt-Shop fehlt SINGLE_PRODUCT_HANDLE.");
+  const product = await getProduct(handle);
+  if (!product) throw new Error(`Der konfigurierte Shopify-Artikel \"${handle}\" wurde nicht gefunden.`);
+  return product;
+});
+
 export async function getCheckoutVariants(ids: string[], buyerIp?: string): Promise<CheckoutVariant[]> {
   const uniqueIds = [...new Set(ids)];
   const data = await shopifyFetch<{ nodes: Array<ShopifyCheckoutVariantNode | null> }>(
@@ -230,6 +240,7 @@ export async function getCheckoutVariants(ids: string[], buyerIp?: string): Prom
           availableForSale
           requiresShipping
           product {
+            handle
             productType
             tags
             productKind: metafield(namespace: "custom", key: "product_kind") { value }
@@ -245,6 +256,7 @@ export async function getCheckoutVariants(ids: string[], buyerIp?: string): Prom
     node
       ? [{
           id: node.id,
+          productHandle: node.product.handle,
           availableForSale: node.availableForSale,
           requiresShipping: node.requiresShipping,
           kind: inferKind(node.product, node.requiresShipping),

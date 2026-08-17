@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "agent/**"]
+    branches: [main, "agent/**", "feature/**"]
   pull_request:
 
 permissions:
@@ -17,6 +17,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://preprod.example.test
       SHOPIFY_STORE_DOMAIN: preprod-example.myshopify.com
       SHOPIFY_STOREFRONT_API_VERSION: 2026-07
+      SINGLE_PRODUCT_HANDLE: modular-desk-kit
       RESEND_API_KEY: re_ci_placeholder
       REVOCATION_EMAIL_FROM: widerruf@example.test
     steps:

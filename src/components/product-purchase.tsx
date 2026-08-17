@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
 export function ProductPurchase({ product }: { product: Product }) {
+  const variantGroupName = useId();
   const [selectedId, setSelectedId] = useState(product.variants[0]?.id ?? "");
   const [added, setAdded] = useState(false);
   const { addLine } = useCart();
@@ -35,7 +36,7 @@ export function ProductPurchase({ product }: { product: Product }) {
             <label key={item.id}>
               <input
                 type="radio"
-                name="variant"
+                name={variantGroupName}
                 value={item.id}
                 checked={item.id === variant.id}
                 onChange={() => setSelectedId(item.id)}

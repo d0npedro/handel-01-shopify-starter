@@ -8,6 +8,7 @@ const complete = {
   SHOPIFY_STORE_DOMAIN: "example.myshopify.com",
   SHOPIFY_STOREFRONT_PRIVATE_TOKEN: "secret",
   SHOPIFY_STOREFRONT_API_VERSION: "2026-07",
+  SINGLE_PRODUCT_HANDLE: "modular-desk-kit",
   LEGAL_NAME: "Beispiel GmbH",
   LEGAL_OWNER: "Erika Beispiel",
   LEGAL_STREET: "Beispielweg 1",
@@ -24,6 +25,7 @@ const preproduction = {
   NEXT_PUBLIC_SITE_URL: "https://preprod.example.de",
   SHOPIFY_STORE_DOMAIN: "example.myshopify.com",
   SHOPIFY_STOREFRONT_API_VERSION: "2026-07",
+  SINGLE_PRODUCT_HANDLE: "modular-desk-kit",
   RESEND_API_KEY: "re_test",
   REVOCATION_EMAIL_FROM: "widerruf@example.de",
 };
@@ -42,6 +44,7 @@ test("pre-production requires demo mode, public HTTPS, Shopify draft config and 
     NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
     SHOPIFY_STORE_DOMAIN: "invalid.example",
     SHOPIFY_STOREFRONT_API_VERSION: "unstable",
+    SINGLE_PRODUCT_HANDLE: "Nicht gültig!",
     RESEND_API_KEY: "",
     REVOCATION_EMAIL_FROM: "invalid",
   });
@@ -50,6 +53,7 @@ test("pre-production requires demo mode, public HTTPS, Shopify draft config and 
   assert.ok(result.errors.some((error) => error.includes("localhost")));
   assert.ok(result.errors.some((error) => error.includes("myshopify.com")));
   assert.ok(result.errors.some((error) => error.includes("RESEND_API_KEY")));
+  assert.ok(result.errors.some((error) => error.includes("SINGLE_PRODUCT_HANDLE")));
 });
 
 test("pre-production rejects secrets exposed through NEXT_PUBLIC variables", () => {

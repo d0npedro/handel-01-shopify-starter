@@ -50,7 +50,7 @@ export function CartPage({ demo }: { demo: boolean }) {
     return (
       <section className="empty-cart">
         <span className="giant-index">00</span>
-        <div><p className="eyebrow">Noch ganz leicht</p><h1>Dein Warenkorb ist leer.</h1><p>Vier Produkttypen warten {demo ? "im Demo-Katalog" : "im Katalog"}.</p><Link className="button button--primary" href="/shop">Produkte entdecken</Link></div>
+        <div><p className="eyebrow">Noch ganz leicht</p><h1>Dein Warenkorb ist leer.</h1><p>Unser ausgewählter Artikel wartet {demo ? "in der Demo" : "auf der Startseite"}.</p><Link className="button button--primary" href="/">Produkt ansehen</Link></div>
       </section>
     );
   }
@@ -66,7 +66,7 @@ export function CartPage({ demo }: { demo: boolean }) {
             <div className={`cart-line__swatch cart-line__swatch--${line.kind}`} aria-hidden="true" />
             <div className="cart-line__main">
               <p className="eyebrow">{line.kind === "physical" ? "Physisch" : "Digital"}</p>
-              <h2><Link href={`/produkt/${line.handle}`}>{line.title}</Link></h2>
+              <h2><Link href="/">{line.title}</Link></h2>
               {line.variantTitle !== "Standard" ? <p>{line.variantTitle}</p> : null}
               <button className="link-button" onClick={() => removeLine(line.variantId)}>Entfernen</button>
             </div>
